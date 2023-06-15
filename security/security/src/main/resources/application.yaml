@@ -14,9 +14,14 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
 
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .mustache
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
