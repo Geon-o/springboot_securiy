@@ -8,20 +8,13 @@ server:
       force: true
 
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql//localhost:3306/security?serverTimeZone=Asia/Seoul
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
-
-  mvc:
-    view:
-      prefix: /templates/
-      suffix: .mustache
+  profiles:
+    include: remote
 
   jpa:
+    open-in-view: false
+    database: mysql
+    show-sql: true
+    generate-ddl: true
     hibernate:
       ddl-auto: create
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: true

@@ -26,9 +26,6 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-# dotenv environment variable files
-.env
-
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -38,3 +35,5 @@ out/
 
 ### VS Code ###
 .vscode/
+
+/src/main/resources/application-remote.yaml
