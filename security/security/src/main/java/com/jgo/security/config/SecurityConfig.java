@@ -27,14 +27,17 @@ public class SecurityConfig{
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         httpSecurity.logout(logout -> logout.logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
+                .logoutSuccessUrl("/loginForm?logout")
                 .permitAll());
         httpSecurity.authorizeHttpRequests(authz -> authz
-                .requestMatchers("/user/**").authenticated()
+                .requestMatchers("/user/**").authenticated()//인증만 되면 들어갈 수 있는 주소
                 .requestMatchers("/manager/**").hasAnyRole("ADMIN or MANAGER")
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN")
                 .anyRequest().permitAll()
-        ).formLogin(formLogin -> formLogin.loginPage("/loginForm"));
+        ).formLogin(formLogin ->
+                formLogin.loginPage("/loginForm")
+                .loginProcessingUrl("/login")// '/login' 주소가 호출되면 시큐리티가 낚아채서 대신 로그인을 진행해줌
+                .defaultSuccessUrl("/"));
 
         return httpSecurity.build();
     }

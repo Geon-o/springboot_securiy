@@ -43,3 +43,49 @@
   - 스프링 시큐리티 프레임워크에서 제공하는 클래스
   - 비밀번호를 암호화하는데 사용할 수 있는 메서드를 가진 클래스
   - BCrypt 해싱함수를 사용
+
+
+***
+##### 23.06.18
+
+# 시큐리티 로그인
+
+## 내용
+- 회원가입 후 사용자 정보를 통해 스프링 시큐리티로 로그인 하는 방법
+- 스프링 시큐리티 로그인 내부 동작방식 확인
+- 로그인을 진행시 완료되면 스프링 시큐리티 session이 생성되고
+- session에 들어갈 수 있는 object 타입은 정해져있음 -> Authenticaion 타입 객체
+- Authenticaion 안에 User 정보가 있어야 함
+- User 오브젝트의 타입을 UserDetails 타입 객체에 넣고 사용
+- 즉 전체적인 구성을 보았을 때 다음과 같음
+  - Security Session -> Authenticaion -> UserDetails
+
+### UserDetails
+- 스프링 시큐리티에서 사용자의 정보를 담는 인터페이스
+- 사용자의 정보를 불러오기 위해서 구현해야할 인터페이스로 기본 오버라이드 메소드가 존재
+  - getAuthorities()
+    - 계정의 권한 목록을 리턴(계정 권한)
+  - getPassword()
+    - 계정의 비밀번호를 리턴
+  - getUsername()
+    - 꼐정의 고유한 값을 리턴
+  - isAccountNonExpired()
+    - 계정의 만료여부
+  - isAccountNonLocked()
+    - 계쩡의 잠김여부
+  - isCredentialsNonExpired()
+    - 비밀번호 만료여부
+  - isEnabled()
+    - 계정의 비활성화(휴먼계정)
+
+
+### UserDetailsService
+- 스프링 시큐리티에서 유저의 정보를 가져오는 인터페이스
+- 다음과 같은 오버라이드 메소드가 존재
+  - loadUserByUsername
+    - 유저의 정보를 불러와서 UserDetails로 리턴
+- 이 작업이 진행이 되면 다음과 같은 구조로 형성이 됨
+  - 시큐리티 session(내부에 Authentication(내부에 UserDetails))
+  - 따라서 유저의 정보를 확인 할 수 있는 구조가 됨
+- 또한 SecurityConfig에서 설정해준 loginProcessingUrl에 설정한 URL 요청이 오면
+- 자동으로 UserDetailsService 타입으로 IoC 되어있는 loadUserByUsername 함수가 실행되는 규칙을 가지고 있음
