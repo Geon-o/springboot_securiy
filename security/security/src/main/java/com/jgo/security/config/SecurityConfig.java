@@ -2,6 +2,8 @@ package com.jgo.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -10,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터체인에 등록이 됨
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig{
     // 스프링 시큐리티 필터
     /**
@@ -25,14 +28,14 @@ public class SecurityConfig{
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.csrf(csrf -> csrf.disable());
         httpSecurity.logout(logout -> logout.logoutUrl("/logout")
                 .logoutSuccessUrl("/loginForm?logout")
                 .permitAll());
         httpSecurity.authorizeHttpRequests(authz -> authz
                 .requestMatchers("/user/**").authenticated()//인증만 되면 들어갈 수 있는 주소
-                .requestMatchers("/manager/**").hasAnyRole("ADMIN or MANAGER")
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN")
+                .requestMatchers("/manager/**").hasAnyRole("MANAGER","ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
         ).formLogin(formLogin ->
                 formLogin.loginPage("/loginForm")

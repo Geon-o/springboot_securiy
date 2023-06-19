@@ -89,3 +89,34 @@
   - 따라서 유저의 정보를 확인 할 수 있는 구조가 됨
 - 또한 SecurityConfig에서 설정해준 loginProcessingUrl에 설정한 URL 요청이 오면
 - 자동으로 UserDetailsService 타입으로 IoC 되어있는 loadUserByUsername 함수가 실행되는 규칙을 가지고 있음
+
+
+***
+##### 23.06.19
+
+# 시큐리티 권한처리
+
+## 내용
+- user 권한말고 admin과 manager 권한 처리
+- deprecated가 된 메소드들이 많아 다수의 권한을 설정해야할 경우
+  - hasAnyRole() 메소드로 처리
+  - 작성시 ROLE_은 이제 자동을 붙여줌으로 작성하지 않고 hasAnyRole("ADMIN", "MANAGER")
+  - 위와 같은 방식으로 작성해주면 된다.
+
+### EnableGlobalMethodSecurity 어노테이션
+- 현재 deprecated 된 상태
+- EnableMethodSecurity를 대신 사용
+
+
+- @EnableMethodSecurity(securedEnabled = true)
+  - Secured 어노테이션 활성화
+    - 특정 메소드에 해당 어노테이션을 걸고 권한설정을 가능하게 함
+    - @Secured("ROLE_ADMIN") 이와 같이 권한설정이 가능
+
+
+- @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
+  - preAuthorize, postAuthorize 어노테이션 활성화
+    - 메소드가 실행되기 직전에 실행되는 어노테이션
+    - 형태는 @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
+    - 위와 같이 설정하여 사용가능
+
