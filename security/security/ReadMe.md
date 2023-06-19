@@ -133,4 +133,21 @@
 - SecurityConfig에 .oauth2Login(oauth2 -> oauth2.loginPage("/loginForm")) 설정이 핑요함
 - 구글 로그인 이후 후처리가 필요함
 
+# 구글 회원 프로필 정보 받아보기
+
+## 내용
+- 카카오 로그인 같은 경우 다음과 같은 순으로 처리가됨
+1. 코드 받기(인증)
+2. 엑세스토큰(권한)
+3. 사용자 프로필 정보 확보
+4. 정보를 토대로 회원가입을 자동으로 진행
+   1. 확보한 정보 외에 필요한 정보가 필요할 경우 추가적인 정보를 입력하도록 함
+
+
+- 구글 로그인이 완료
+  - 코드를 받는것이 아닌 엑세스토큰과 사용자 정보를 한번에 받음
+  - DefaultOAuth2UserService를 상속하여 구글로 받은 데이터에 대한 후처리를 함
+    - 후처리를 해주는 메소드를 오버라이드 해야함
+    - loadUser(OAuth2UserRequest userRequest)
+      - 해당 함수는 sub, name, given_name, family_name, picture, email, email_verified, locale 데이터를 넘겨줌
 

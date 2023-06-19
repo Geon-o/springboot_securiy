@@ -24,6 +24,10 @@ public class User {
 
     private String role;
 
+    private String provider; //어떤 소셜로그인을 사용했는지
+
+    private String providerId;
+
     @CreationTimestamp
     private Timestamp createDate;
 }
