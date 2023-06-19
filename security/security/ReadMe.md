@@ -120,3 +120,17 @@
     - 형태는 @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
     - 위와 같이 설정하여 사용가능
 
+
+# 구글 로그인 준비
+
+## 내용
+- 구글 oauth api 키 세팅
+- http://localhost:8888/login/oauth2/code/google
+  - 여기서 login/oauth2/code는 고정 주소
+  - 서비스에서 파라미터로 인증 정보가 주어졌을 때 인증을 성공하면 구글에서 리다이렉트할 URL
+
+
+- SecurityConfig에 .oauth2Login(oauth2 -> oauth2.loginPage("/loginForm")) 설정이 핑요함
+- 구글 로그인 이후 후처리가 필요함
+
+
