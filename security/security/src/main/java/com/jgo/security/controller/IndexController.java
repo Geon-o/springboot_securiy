@@ -1,5 +1,6 @@
 package com.jgo.security.controller;
 
+import com.jgo.security.auth.PrincipalDetails;
 import com.jgo.security.entity.User;
 import com.jgo.security.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +27,25 @@ public class IndexController {
 
     @Autowired
     private BCryptPasswordEncoder encode;
+
+    @GetMapping("/test/login")
+    public @ResponseBody String loginTest(Authentication authentication, @AuthenticationPrincipal PrincipalDetails userDetails) { // DI(의존성 주입)
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        log.info("loginTest() :" +principalDetails.getUser());
+        log.info("userDetails: " + userDetails.getUser());
+
+        return "세션 정보 확인하기";
+    }
+
+    @GetMapping("/test/oauth/login")
+    public @ResponseBody String testOauthLogin(Authentication authentication, @AuthenticationPrincipal OAuth2User oAuth) { // DI(의존성 주입)
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        log.info("testOauthLogin() :" +oAuth2User.getAttributes());
+        log.info("oauth2User() :" +oAuth.getAttributes());
+
+
+        return "oauth 세션 정보 확인하기";
+    }
 
     @GetMapping({"", "/"})
     public String index() {

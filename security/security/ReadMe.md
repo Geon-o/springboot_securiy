@@ -151,3 +151,76 @@
     - loadUser(OAuth2UserRequest userRequest)
       - 해당 함수는 sub, name, given_name, family_name, picture, email, email_verified, locale 데이터를 넘겨줌
 
+***
+##### 23.06.20
+
+
+# Authentication객체가 가질수 있는 2가지타입
+- getClientRegistration()에서 얻은 registrationId로 어떤 Oauth로 로그인 했는지 확인가능
+- 회원프로필을 받는과정
+1. 구글로그인 버튼 클릭
+2. 구글로그인창
+3. 로그인 완료
+4. code 리턴(OAuth-Client 라이브러리)
+5. AccessToken 요청
+6. userRequest 정보
+7. loadUser함수 호출
+8. 구글로부터 회원프로필 받기
+
+
+## 내용
+1. Authentication 클래스
+  - Authentication의 getPrincipal()은 object 타입으로 리턴
+  - 그리하여 PrincipalDetails 클래스로 형변환 후 데이터 컨트롤
+  - 해당 클래스 DI를 통해 User 정보를 받을 수 있음
+
+
+2. @AuthenticationPrincipal 어노테이션
+  - 세션유저에 접근할 수 있음
+  - 따라서 User 정보를 받을 수 있음
+```java
+@GetMapping("/test/login")
+    public @ResponseBody String loginTest(Authentication authentication, 
+@AuthenticationPrincipal PrincipalDetails userDetails) { 
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        log.info("loginTest() :" +principalDetails.getUser());
+        log.info("userDetails: " + userDetails.getUser());
+
+        return "세션 정보 확인하기";
+    }
+```
+- 결과
+```shell
+loginTest() :User(id=2, username=eee, password=$2a$10$fJ2M.oR1YujmSAS1SfZiBeijDSH0a0qTZBTosButWccplfk/MrSJi, email=eee@naver.com, role=ROLE_USER, provider=null, providerId=null, createDate=2023-06-18 18:06:14.517694)
+userDetails: User(id=2, username=eee, password=$2a$10$fJ2M.oR1YujmSAS1SfZiBeijDSH0a0qTZBTosButWccplfk/MrSJi, email=eee@naver.com, role=ROLE_USER, provider=null, providerId=null, createDate=2023-06-18 18:06:14.517694)
+```
+- 위와 같은 결과가 나타남
+- 위의 코드는 그냥 소셜로그인이 아닌 일반 로그인일때만 가능함
+- 소셜로그인으로 진행하였을 떄 ClassCastException이 나타남
+### 해결
+```java
+@GetMapping("/test/oauth/login")
+    public @ResponseBody String testOauthLogin(Authentication authentication, @AuthenticationPrincipal OAuth2User oAuth) { // DI(의존성 주입)
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        log.info("testOauthLogin() :" +oAuth2User.getAttributes());
+        log.info("oauth2User() :" +oAuth.getAttributes());
+
+
+        return "oauth 세션 정보 확인하기";
+    }
+```
+- 다음과 같이 OAuth2User 클래스를 DI 하거나 @AuthenticationPrincipal을 통해 user의 정보를 얻을 수 있음
+
+## 정리
+- 스프링 시큐리티
+  - 서버 세션안에 시큐리티가 관리하는 세션이 존재함
+  - 시큐리티 세션에 들어갈 수 있는 타입은 Authentication 객체뿐임(무조건)
+  - 사용하려면 컨트롤러에서 Authentication을 DI 해야함
+    - Authentication 안에 들어갈 수 있는 타입
+      1. UserDetails 타입
+         - 일반적인 로그인을 할때
+      2. OAuth2User 타입
+         - 소셜로그인 할 때 
+  - 하지만 컨트롤러에서 두가지를 처리하기에는 너무 복잡해짐
+  - 그렇기에 UserDetails와 Oauth2User를 implements를 하여 유연하게 처리하도록 설정
+  - 이미 PrincipalDetails에는 Oauth2User가 implements되어 있기에 OAuth2User도 implements 해주면 됨
