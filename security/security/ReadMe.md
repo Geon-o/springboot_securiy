@@ -224,3 +224,80 @@ userDetails: User(id=2, username=eee, password=$2a$10$fJ2M.oR1YujmSAS1SfZiBeijDS
   - 하지만 컨트롤러에서 두가지를 처리하기에는 너무 복잡해짐
   - 그렇기에 UserDetails와 Oauth2User를 implements를 하여 유연하게 처리하도록 설정
   - 이미 PrincipalDetails에는 Oauth2User가 implements되어 있기에 OAuth2User도 implements 해주면 됨
+
+***
+##### 23.06.21
+
+# 구글로그인 및 자동 회원가입 진행 완료
+
+## 내용
+- 회원가입을 하려면 User 객체가 필요
+  - 하지만 시큐리티 세션에는 OAuth2User와 userDetails 객체만 존재
+  - 그리하여 PrincipalDetails 클래스를 만든거임
+
+
+```java
+public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
+
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    
+    @Autowired
+    private UserRepository userRepository;
+
+    // 구글로 부터 받은 userRequest 데이터에 대한 후처리되는 함수
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        log.info("getClientRegistration(): " + userRequest.getClientRegistration());
+        log.info("getAccessToken().getTokenValue(): " + userRequest.getAccessToken().getTokenValue());
+
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+        log.info("getAttributes(): " + oAuth2User.getAttributes());
+
+        String provider = userRequest.getClientRegistration().getClientId(); // google
+        String providerId = oAuth2User.getAttribute("sub");
+        String username = provider+"_"+providerId;
+        String password = bCryptPasswordEncoder.encode("겟인데어");
+        String email = oAuth2User.getAttribute("email");
+        String role = "ROLE_USER";
+
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            user = user.builder()
+                    .username(username)
+                    .password(password)
+                    .email(email)
+                    .role(role)
+                    .provider(provider)
+                    .providerId(providerId)
+                    .build();
+
+            userRepository.save(user);
+        }
+
+        return new PrincipalDetails(user, oAuth2User.getAttributes());
+    }
+}
+```
+- 다음과 같이 PrincipalOauth2UserService 클래스에 다음과 같이 설정해두면 oauth로 로그인시
+자동 회원가입을 시키며 로그인이 된다.
+- 따라서 이전시간에 일반로그인 컨트롤러와 oauth 로그인 컨트롤러를 나눌필요 없이
+다음과 같이 설정할 수 있다.
+```java
+@GetMapping("/user")
+    public @ResponseBody String user(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        log.info("principalDetails: " + principalDetails.getUser());
+        return "user";
+    }
+```
+- 이와 같이 하나의 클래스를 통해 일반로그인와 oauth 로그인 둘다 처리가 가능해진다.
+- 또한 PrincipalDetailsService와 PrincipalOauth2UserService는 만들지 않아도 알아서 내부 메소드가 호출되어 로그인이 됨.
+
+
+- 근데 굳이 왜 만들었냐?
+  - PrincipalDetails 타입을 리턴하기 위해 만들었음.
+  - 리턴과 동시에 Authentication에 저장됨.
+
+
+- 또 @AuthenticationPrincipal 어노테이션은 각 PrincipalDetailsService와 PrincipalOauth2UserService의
+함수가 종료될 시 만들어진다.

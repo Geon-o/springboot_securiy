@@ -23,9 +23,17 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
 
     //콤포지션
     private User user;
+    private Map<String, Object> attributes;
 
+    // 일반로그인
     public PrincipalDetails(User user) {
         this.user = user;
+    }
+
+    // OAuth로그인
+    public PrincipalDetails(User user, Map<String, Object> attributes) {
+        this.user = user;
+        this.attributes = attributes;
     }
 
     /**
@@ -81,22 +89,11 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
         return true;
     }
 
-    /**
-     * Get the OAuth 2.0 token attributes
-     *
-     * @return the OAuth 2.0 token attributes
-     */
     @Override
     public Map<String, Object> getAttributes() {
-        return null;
+        return attributes;
     }
 
-    /**
-     * Returns the name of the authenticated <code>Principal</code>. Never
-     * <code>null</code>.
-     *
-     * @return the name of the authenticated <code>Principal</code>
-     */
     @Override
     public String getName() {
         return null;
