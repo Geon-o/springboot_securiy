@@ -1,6 +1,9 @@
 package com.jgo.security.config.oauth;
 
 import com.jgo.security.auth.PrincipalDetails;
+import com.jgo.security.auth.provider.FacebookUserInfo;
+import com.jgo.security.auth.provider.GoogleUserInfo;
+import com.jgo.security.auth.provider.OAuth2UserInfo;
 import com.jgo.security.entity.User;
 import com.jgo.security.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +33,22 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         log.info("getAttributes(): " + oAuth2User.getAttributes());
 
-        String provider = userRequest.getClientRegistration().getRegistrationId(); // google
-        String providerId = oAuth2User.getAttribute("sub");
+        OAuth2UserInfo oAuth2UserInfo = null;
+        if (userRequest.getClientRegistration().getRegistrationId().equals("google")) {
+            oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
+
+        } else if (userRequest.getClientRegistration().getRegistrationId().equals("facebook")) {
+            oAuth2UserInfo = new FacebookUserInfo(oAuth2User.getAttributes());
+
+        } else {
+            log.info("구글, 페이스북만 할 수 있음");
+        }
+
+        String provider = oAuth2UserInfo.getProvider();
+        String providerId = oAuth2UserInfo.getProviderId();
         String username = provider+"_"+providerId;
         String password = bCryptPasswordEncoder.encode("겟인데어");
-        String email = oAuth2User.getAttribute("email");
+        String email = oAuth2UserInfo.getEmail();
         String role = "ROLE_USER";
 
         User user = userRepository.findByUsername(username);

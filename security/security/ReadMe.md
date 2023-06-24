@@ -301,3 +301,21 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
 - 또 @AuthenticationPrincipal 어노테이션은 각 PrincipalDetailsService와 PrincipalOauth2UserService의
 함수가 종료될 시 만들어진다.
+
+***
+##### 23.06.14
+
+# 페이스북 로그인 완료
+
+## 내용
+- 페이스북 api 설정
+- yaml설정 시 구글로그인 경우 scope를 email과 profile을 받도록 설정
+- 달리 페이스북 로그인시 email과 public_profile로 scope 설정
+  - 그 이유는 페이스북 api 문서(https://developers.facebook.com/docs/facebook-login/web)
+  에서 확인해보면 호출 샘플을 확인할 수 있고 위와 같이 설명한 형태로 데이터가 넘어오기 때문에 설정
+
+
+- 기존에 구글로그인 시에는 oauth2user.getAttributes()를 통해 넘어오는 데이터가 
+sub, name, email이 있었지만 facebook으로 넘어오는 데이터는 id, name, email 이여서
+db 저장시 providerid 가 null이 돼버리는 현상 발생
+- 이에 구분지어서 데이터를 받기위해 interface를 만들고 각 class를 지정해줌
