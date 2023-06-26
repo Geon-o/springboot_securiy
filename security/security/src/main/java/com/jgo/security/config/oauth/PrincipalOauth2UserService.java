@@ -3,6 +3,7 @@ package com.jgo.security.config.oauth;
 import com.jgo.security.auth.PrincipalDetails;
 import com.jgo.security.auth.provider.FacebookUserInfo;
 import com.jgo.security.auth.provider.GoogleUserInfo;
+import com.jgo.security.auth.provider.NaverUserInfo;
 import com.jgo.security.auth.provider.OAuth2UserInfo;
 import com.jgo.security.entity.User;
 import com.jgo.security.repository.UserRepository;
@@ -14,6 +15,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -40,8 +43,11 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         } else if (userRequest.getClientRegistration().getRegistrationId().equals("facebook")) {
             oAuth2UserInfo = new FacebookUserInfo(oAuth2User.getAttributes());
 
+        } else if (userRequest.getClientRegistration().getRegistrationId().equals("naver")) {
+            oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
+
         } else {
-            log.info("구글, 페이스북만 할 수 있음");
+            log.info("구글, 페이스북, 네이버만 할 수 있음");
         }
 
         String provider = oAuth2UserInfo.getProvider();

@@ -319,3 +319,57 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 sub, name, email이 있었지만 facebook으로 넘어오는 데이터는 id, name, email 이여서
 db 저장시 providerid 가 null이 돼버리는 현상 발생
 - 이에 구분지어서 데이터를 받기위해 interface를 만들고 각 class를 지정해줌
+
+***
+##### 23.06.26
+
+# 네이버 로그인
+
+## 내용
+* 보충설명
+   - Oauth2-client 라이브러리
+     - provider 존재
+       - 페이스북, 구글, 트위터 등 기본제공
+       - 네이버, 카카오는 존재하지 않음
+         - 이유는 getAttribute 값이 모두 다르기 때문에
+
+
+- Oauth2 방식(4가지 존재)
+  - Code
+    - 코드를 부여받는 방식(네이버로그인)
+  - client credentials grant type
+    - react or js로 구성
+
+```shell
+naver:
+ client-id:
+ client-secret:
+ scope:
+  - name
+  - email
+ client-name: naver
+ authorization-grant-type: authorization_code
+ redirect-uri: http://localhost:8888/login/oauth2/code/naver
+```
+
+##### 위와 같이 yaml 파일을 설정해줘야함
+- 이유는 기본 provider로 지정되어 있지않기 때문
+- 하지만 등록후 저장시 터미널에서 다음과 같은 에러를 띄움
+```shell
+threw exception with message: Provider ID must be specified for client registration 'naver'
+```
+##### 이는 oauth2의 기본 provider에 naver가 등록되지 않기 떄문에 나타나는 이슈
+- 해결하기 위해 다음과 같이 설정
+```shell
+provider:
+          naver:
+           authorization-uri: https://nid.naver.com/oauth2.0/authorize
+           token-uri: https://nid.naber.com/oaut2.0/token
+           user-info-uri: https://openapi.naver.com/v1/nid/me
+           user-name-attribute: response #회원정보를 json으로 받는데 response라는 키값으로 네이버가 리턴해줌.
+```
+##### 각 내용들은 https://developers.naver.com/docs/login/devguide/devguide.md#2-2-1-%EC%86%8C%EC%85%9C-%EB%A1%9C%EA%B7%B8%EC%9D%B8 여기서 확인
+- 3.4.2 ~ 3.4.5 확인
+
+### 여기까지 spring boot 기본 로그인 + OAuth2.0 로그인 통합구현
+***
