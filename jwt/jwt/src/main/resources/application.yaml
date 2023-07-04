@@ -1,0 +1,20 @@
+server:
+  port: 8888
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  profiles:
+    include: remote
+
+  jpa:
+    open-in-view: false
+    database: mysql
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
